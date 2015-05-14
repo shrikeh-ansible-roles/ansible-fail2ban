@@ -1,0 +1,11 @@
+---
+fail2ban_action_iptables:
+  name: iptables
+  template:
+    src:  'action.d/iptables.conf.j2'
+
+fail2ban_action_sendmail_whois:
+  name: 'sendmail-whois'
+  template:
+    src:  'action.d/sendmail-whois.conf.j2'
+...

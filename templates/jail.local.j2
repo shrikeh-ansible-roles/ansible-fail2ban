@@ -1,0 +1,73 @@
+{%- extends 'jail.base.j2' %}
+
+{% block jails %}
+#
+# JAILS
+#
+
+# Next jails corresponds to the standard configuration in Fail2ban 0.6 which
+# was shipped in Debian. Enable any defined here jail by including
+#
+# [SECTION_NAME]
+# enabled = true
+
+#
+# in /etc/fail2ban/jail.local.
+#
+# Optionally you may override any other parameter (e.g. banaction,
+# action, port, logpath, etc) in that section within jail.local
+
+{%- from 'macros.j2' import render_config with context %}
+{# This is a workaround so that we get the jails correctly indented -#}
+{%- set max_key_length = [] -%}
+{%- for config in fail2ban_jails|map(attribute='config') %}
+  {%- for key, val in config.iteritems() -%}
+    {%- if max_key_length.append(key | length) %}{% endif %}
+  {%- endfor %}
+{%- endfor %}
+{%- set max_key_length = max_key_length | max %}
+{% for jail in fail2ban_jails %}
+[{{ jail.name }}]
+
+{%- set jail_vars = {} %}
+{%- for key, value in jail.config.iteritems() %}
+  {%- set jail_vals = [] %}
+  {%- if (value is string) or (value is number) %}
+    {#- simple scalar, append it #}
+    {%- if jail_vals.append(value | string) %}{% endif %}
+  {%- else %}
+    {%- if (key == 'filter') %}
+    {%- if jail_vals.append(value.name) %}{% endif %}
+    {%- endif %}
+    {%- if (key == 'actions') %}
+      {%- set key = 'action' %}
+      {%- set actions = {} %}
+      {%- for act in value %}
+        {%- set action_args = '' %}
+        {%- if act.args is defined %}
+          {# this has additional arguments, let's concatenate them #}
+          {%- set args = [] %}
+          {%- for arg, val in act.args.iteritems() %}
+            {%- if args.append([arg, '=', val] | join) %}{%endif %}
+          {% endfor %}
+          {%- if args.count %}
+            {%- set action_args = ['[', args | join(','), ']'] | join %}
+          {%- endif %}
+        {% endif %}
+
+        {%- if actions.update({act.action.name:action_args }) %}{%- endif %}
+      {% endfor %}
+      {%- for action_name, action_args in actions.iteritems() %}
+        {%- if jail_vals.append([action_name, action_args] | join(' ')) %}{% endif %}
+      {% endfor %}
+    {% endif %}
+  {% endif %}
+  {%- if (jail_vars.update({key:jail_vals})) %}{%- endif %}
+{% endfor %}
+
+{% for key, vals in jail_vars.iteritems() %}
+{{ render_config(key, vals, max_key_length) }}
+{% endfor %}
+
+{% endfor %}
+{% endblock jails %}

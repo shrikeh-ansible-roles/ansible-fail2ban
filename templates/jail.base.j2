@@ -1,0 +1,133 @@
+# {{ ansible_managed }}
+#
+# Fail2Ban configuration file.
+#
+# This file was composed for Debian systems from the original one
+# provided now under /usr/share/doc/fail2ban/examples/jail.conf
+# for additional examples.
+#
+# Comments: use '#' for comment lines and ';' for inline comments
+#
+# To avoid merges during upgrades DO NOT MODIFY THIS FILE
+# and rather provide your changes in /etc/fail2ban/jail.local
+#
+
+# The DEFAULT allows a global definition of the options. They can be overridden
+# in each jail afterwards.
+
+[DEFAULT]
+{% block ignoreip %}
+# "ignoreip" can be an IP address, a CIDR mask or a DNS host. Fail2ban will not
+# ban a host which matches an address in this list. Several addresses can be
+# defined using space separator.
+ignoreip = {% for ip in fail2ban_ignoreip | mandatory %} {{ ip | ipaddr }}{% endfor %}
+{% endblock ignoreip %}
+
+{% block ignorecommand %}
+# External command that will take an tagged arguments to ignore, e.g. <ip>,
+# and return true if the IP is to be ignored. False otherwise.
+#
+# ignorecommand = /path/to/command <ip>
+ignorecommand = {{ fail2ban_ignorecommand | default('') }}
+{% endblock ignorecommand %}
+
+{% block bantime %}
+# "bantime" is the number of seconds that a host is banned.
+bantime  = {{ fail2ban_bantime | default('600') }}
+{% endblock bantime %}
+
+# A host is banned if it has generated "maxretry" during the last "findtime"
+# seconds.
+findtime = {% block findtime %}{{ fail2ban_findtime | default('600') }}{% endblock findtime %}
+
+maxretry = {% block maxretry %}{{ fail2ban_maxretry | default('3') }}{% endblock maxretry %}
+
+{% block backend %}
+# "backend" specifies the backend used to get files modification.
+# Available options are "pyinotify", "gamin", "polling" and "auto".
+# This option can be overridden in each jail as well.
+#
+# pyinotify: requires pyinotify (a file alteration monitor) to be installed.
+#            If pyinotify is not installed, Fail2ban will use auto.
+# gamin:     requires Gamin (a file alteration monitor) to be installed.
+#            If Gamin is not installed, Fail2ban will use auto.
+# polling:   uses a polling algorithm which does not require external libraries.
+# auto:      will try to use the following backends, in order:
+#            pyinotify, gamin, polling.
+backend = {{ fail2ban_backend | default('auto') }}
+{% endblock backend %}
+
+{% block usedns %}
+# "usedns" specifies if jails should trust hostnames in logs,
+#   warn when reverse DNS lookups are performed, or ignore all hostnames in logs
+#
+# yes:   if a hostname is encountered, a reverse DNS lookup will be performed.
+# warn:  if a hostname is encountered, a reverse DNS lookup will be performed,
+#        but it will be logged as a warning.
+# no:    if a hostname is encountered, will not be used for banning,
+#        but it will be logged as info.
+usedns = {{ fail2ban_usedns | default('warn') }}
+{% endblock usedns %}
+
+{% block sendemail %}
+#
+# Destination email address used solely for the interpolations in
+# jail.{conf,local} configuration files.
+destemail = {{ fail2ban_dest_email | default('root@localhost') }}
+#
+# Name of the sender for mta actions
+sendername = {{ fail2ban_sendername | default('Fail2Ban') }}
+{% endblock sendemail %}
+
+#
+# ACTIONS
+#
+{% block ban_action %}
+# Default banning action (e.g. iptables, iptables-new,
+# iptables-multiport, shorewall, etc) It is used to define
+# action_* variables. Can be overridden globally or per
+# section within jail.local file
+banaction = {{ fail2ban_banaction | default('iptables-multiport') }}
+{% endblock ban_action %}
+
+{% block mail_action %}
+# email action. Since 0.8.1 upstream fail2ban uses sendmail
+# MTA for the mailing. Change mta configuration parameter to mail
+# if you want to revert to conventional 'mail'.
+mta = {{ fail2ban_mta | default('sendmail') }}
+{% endblock mail_action %}
+
+{% block protocol %}
+# Default protocol
+protocol = {{fail2ban_protocol | default('tcp') }}
+{% endblock protocol %}
+{% block chain %}
+# Specify chain where jumps would need to be added in iptables-* actions
+chain = {{ fail2ban_chain | default('INPUT') }}
+{% endblock chain %}
+
+{% block action_shortcuts %}
+#
+# Action shortcuts. To be used to define action parameter
+
+# The simplest action to take: ban only
+action_ = %(banaction)s[name=%(__name__)s, port="%(port)s", protocol="%(protocol)s", chain="%(chain)s"]
+
+# ban & send an e-mail with whois report to the destemail.
+action_mw = %(banaction)s[name=%(__name__)s, port="%(port)s", protocol="%(protocol)s", chain="%(chain)s"]
+              %(mta)s-whois[name=%(__name__)s, dest="%(destemail)s", protocol="%(protocol)s", chain="%(chain)s", sendername="%(sendername)s"]
+
+# ban & send an e-mail with whois report and relevant log lines
+# to the destemail.
+action_mwl = %(banaction)s[name=%(__name__)s, port="%(port)s", protocol="%(protocol)s", chain="%(chain)s"]
+               %(mta)s-whois-lines[name=%(__name__)s, dest="%(destemail)s", logpath=%(logpath)s, chain="%(chain)s", sendername="%(sendername)s"]
+
+# Choose default action.  To change, just override value of 'action' with the
+# interpolation to the chosen action shortcut (e.g.  action_mw, action_mwl, etc) in jail.local
+# globally (section [DEFAULT]) or per specific section
+action = %({{ fail2ban_default_action | default('action') }})s
+{% endblock action_shortcuts %}
+
+{% block jails %}
+
+{% endblock jails %}

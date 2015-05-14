@@ -1,0 +1,9 @@
+---
+- name: Include CentOS vars
+  include_vars: centos.yml
+
+- name: Install fail2ban via yum
+  yum: >
+    name='fail2ban'
+    state='latest'
+...

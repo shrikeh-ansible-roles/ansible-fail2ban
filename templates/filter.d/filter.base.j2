@@ -1,0 +1,19 @@
+# {{ ansible_managed }}
+#
+# {% block description %}
+# {% endblock description %}
+#
+#
+{% block includes %}
+{% endblock includes %}
+
+{% block definition %}
+[Definition]
+failregex = {% block failregex %}{% endblock failregex %}
+
+ignoreregex = {% block ignoreregex %}{% endblock ignoreregex %}
+{% endblock definition %}
+
+{% block notes %}
+
+{% endblock notes %}

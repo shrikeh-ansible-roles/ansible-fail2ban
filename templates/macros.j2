@@ -1,0 +1,3 @@
+{% macro render_config(key, values, offset) -%}
+{{ key.ljust(offset) }} = {{ values | join("\n") | indent(offset + 3) }}
+{%- endmacro %}

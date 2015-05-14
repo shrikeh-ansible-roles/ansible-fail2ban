@@ -1,0 +1,20 @@
+---
+fail2ban_filter_default: &filter_default
+  conf:
+    owner: "{{ fail2ban_filter_owner | default('root') }}"
+    group: "{{ fail2ban_filter_group | default('root') }}"
+    mode: "{{ fail2ban_filter_mode | default('0600') }}"
+
+fail2ban_filter_3proxy:
+  <<: *filter_default
+  name: 3proxy
+  conf:
+    src:  'filter.d/3proxy.conf.j2'
+
+
+fail2ban_filter_sshd:
+  <<: *filter_default
+  name: sshd
+  conf:
+    src:  'filter.d/sshd.conf.j2'
+...

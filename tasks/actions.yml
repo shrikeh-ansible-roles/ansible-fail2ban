@@ -1,0 +1,12 @@
+---
+- name: Include the list of default actions
+  include_vars: actions.yml
+
+- name: Make sure the action.d folder exists
+  file: >
+    path="{{ fail2ban_action_dir }}"
+    owner="{{ fail2ban_action_owner | default('root') }}"
+    group="{{ fail2ban_action_group | default('root') }}"
+    mode="{{ fail2ban_action_mode | default('0600') }}"
+    state=directory
+...

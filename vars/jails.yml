@@ -1,0 +1,37 @@
+---
+fail2ban_jails_default: &jail_default
+  config:
+    actions: []
+    enabled: true
+
+
+fail2ban_jails_ssh:
+  <<: *jail_default
+  name: ssh
+  config:
+    port: 'ssh'
+    filter: "{{ fail2ban_filter_sshd }}"
+    logpath: "{{ fail2ban_auth_log }}"
+    maxretry: 6
+
+fail2ban_jails_ssh_iptables:
+  <<: *jail_default
+  name: ssh-iptables
+  config:
+    enabled: false
+    filter: "{{ fail2ban_filter_sshd }}"
+    actions:
+      - action: "{{ fail2ban_action_iptables }}"
+        args:
+          name: SSH
+          port: ssh
+          protocol: tcp
+      - action: "{{ fail2ban_action_sendmail_whois }}"
+        args:
+          name:       SSH
+          dest:       you@example.com
+          sender:     fail2ban@example.com
+          sendername: Fail2Ban
+    logpath: "{{ fail2ban_auth_log }}"
+    maxretry: 5
+...
