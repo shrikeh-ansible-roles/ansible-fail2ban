@@ -29,9 +29,9 @@ fail2ban_jails_ssh_iptables:
       - action: "{{ fail2ban_action_sendmail_whois }}"
         args:
           name:       SSH
-          dest:       you@example.com
-          sender:     fail2ban@example.com
-          sendername: Fail2Ban
+          dest:       "{{ fail2ban_dest_email }}"
+          sender:     "{{ fail2ban_send_email }}"
+          sendername: "{{ fail2ban_sendername }}"
     logpath: "{{ fail2ban_auth_log }}"
     maxretry: 5
 ...
