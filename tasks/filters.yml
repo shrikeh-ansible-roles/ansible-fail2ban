@@ -1,21 +1,22 @@
+%YAML 1.2
 ---
-- name: Include the list of default filters
-  include_vars: filters.yml
-  
+
 - name: Make sure the filter.d folder exists
-  file: >
-    path="{{ fail2ban_filter_dir }}"
-    owner="{{ fail2ban_filter_owner | default('root') }}"
-    group="{{ fail2ban_filter_group | default('root') }}"
-    mode="{{ fail2ban_filter_mode | default('0600') }}"
-    state=directory
+  file:
+    path:   "{{ fail2ban_filter_dir }}"
+    owner:  "{{ fail2ban_filter_owner | default('root') }}"
+    group:  "{{ fail2ban_filter_group | default('root') }}"
+    mode:   "{{ fail2ban_filter_mode | default('0600') }}"
+    state:  directory
 
 - name: Copy the correct filters into place
-  template: >
-    dest="{{ item.config.filter.conf.dest | default([fail2ban_filter_dir, '/', item.config.filter.name, '.conf'] | join) }}"
-    src="{{ item.config.filter.conf.src }}"
-    owner="{{ item.config.filter.conf.owner | default(omit) }}"
-    group="{{ item.config.filter.conf.group | default(omit) }}"
-    mode="{{ item.config.filter.conf.mode | default(omit) }}"
+  template:
+    dest:   "{{ item.config.filter.conf.dest | default([fail2ban_filter_dir, '/', item.config.filter.name, '.conf'] | join) }}"
+    src:    "{{ item.config.filter.conf.src }}"
+    owner:  "{{ item.config.filter.conf.owner | default(omit) }}"
+    group:  "{{ item.config.filter.conf.group | default(omit) }}"
+    mode:   "{{ item.config.filter.conf.mode | default(omit) }}"
   with_items: fail2ban_jails
+  notify:
+    - restart fail2ban
 ...

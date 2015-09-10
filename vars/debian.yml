@@ -1,4 +1,0 @@
----
-fail2ban_distro_ssh_log: /var/log/sshd.log
-fail2ban_distro_auth_log: /var/log/auth.log
-...

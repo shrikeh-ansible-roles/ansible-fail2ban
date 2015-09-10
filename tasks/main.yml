@@ -1,11 +1,11 @@
+%YAML 1.2
 ---
-
 - name: Include CentOS
-  include: centos.yml
+  include: distros/centos.yml
   when: ansible_pkg_mgr == 'yum'
 
 - name: Include Debian
-  include: debian.yml
+  include: distros/debian.yml
   when: ansible_pkg_mgr == 'apt'
 
 - name: Include jails
@@ -18,15 +18,13 @@
   include: actions.yml
 
 - name: Put the local jail in place
-  template: >
-    dest="{{ fail2ban_localjail_path | default('/etc/fail2ban/jail.local') }}"
-    src="{{ fail2ban_localjail_template | default('jail.local.j2') }}"
-    owner="{{ fail2ban_localjail_owner | default('root') }}"
-    group="{{ fail2ban_localjail_group | default('root') }}"
-    mode="{{ fail2ban_localjail_mode | default('0600') }}"
+  template:
+    dest:   "{{ fail2ban_localjail_path }}"
+    src:    "{{ fail2ban_localjail_template }}"
+    owner:  "{{ fail2ban_localjail_owner }}"
+    group:  "{{ fail2ban_localjail_group }}"
+    mode:   "{{ fail2ban_localjail_mode }}"
+  notify:
+    - restart fail2ban
 
-- name: Start fail2ban
-  service: >
-    name=fail2ban
-    state=restarted
 ...

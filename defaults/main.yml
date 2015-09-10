@@ -1,12 +1,13 @@
 ---
 
+fail2ban_pkg_install_latest: no
+
 fail2ban_config_dir:          '/etc/fail2ban'
 
 fail2ban_filter_dir:          "{{ fail2ban_config_dir }}/filter.d"
 fail2ban_filter_owner:        root
 fail2ban_filter_group:        root
 fail2ban_filter_mode:         '0600'
-
 
 fail2ban_action_dir:          "{{ fail2ban_config_dir }}/action.d"
 fail2ban_action_owner:        root
@@ -28,6 +29,16 @@ fail2ban_ignoreip:            "{{ fail2ban_default_ips }}"
 
 fail2ban_auth_log:            "{{ fail2ban_distro_auth_log }}"
 
+fail2ban_action_iptables:
+  name: iptables
+  template:
+    src:  'action.d/iptables.conf.j2'
+
+fail2ban_action_sendmail_whois:
+  name: 'sendmail-whois'
+  template:
+    src:  'action.d/sendmail-whois.conf.j2'
+
 
 fail2ban_bantime:             60
 fail2ban_findtime:            600
@@ -42,6 +53,7 @@ fail2ban_mta:                 sendmail
 fail2ban_protocol:            tcp
 fail2ban_chain:               INPUT
 
+
 fail2ban_actions:
   action_: '%(banaction)s[name=%(__name__)s, port="%(port)s", protocol="%(protocol)s", chain="%(chain)s"]'
   action_mw: |
@@ -52,10 +64,71 @@ fail2ban_actions:
     %(mta)s-whois-lines[name=%(__name__)s, dest="%(destemail)s", logpath=%(logpath)s, chain="%(chain)s", sendername="%(sendername)s"]
 fail2ban_default_action: action_
 
+fail2ban_jails_default: &jail_default
+  config:
+    actions: []
+    enabled: true
+
+fail2ban_jails_ssh:
+  <<: *jail_default
+  name: ssh
+  config:
+    port: 'ssh'
+    filter: "{{ fail2ban_filter_sshd }}"
+    logpath: "{{ fail2ban_auth_log }}"
+    maxretry: 6
+
+fail2ban_jails_ssh_iptables:
+  <<: *jail_default
+  name: ssh-iptables
+  config:
+    enabled: false
+    filter: "{{ fail2ban_filter_sshd }}"
+    actions:
+      - action: "{{ fail2ban_action_iptables }}"
+        args:
+          name: SSH
+          port: ssh
+          protocol: tcp
+      - action: "{{ fail2ban_action_sendmail_whois }}"
+        args:
+          name:       SSH
+          dest:       "{{ fail2ban_dest_email }}"
+          sender:     "{{ fail2ban_send_email }}"
+          sendername: "{{ fail2ban_sendername }}"
+    logpath: "{{ fail2ban_auth_log }}"
+    maxretry: 5
+
+
+fail2ban_filter_default: &filter_default
+  conf:
+    owner: "{{ fail2ban_filter_owner | default('root') }}"
+    group: "{{ fail2ban_filter_group | default('root') }}"
+    mode: "{{ fail2ban_filter_mode | default('0600') }}"
+
+fail2ban_filter_3proxy:
+  <<: *filter_default
+  name: 3proxy
+  conf:
+    src:  'filter.d/3proxy.conf.j2'
+
+fail2ban_filter_sshd:
+  <<: *filter_default
+  name: sshd
+  conf:
+    src:  'filter.d/sshd.conf.j2'
+
 fail2ban_jails:
   - "{{ fail2ban_jails_ssh }}"
   - "{{ fail2ban_jails_ssh_iptables }}"
 
 fail2ban_filters:
   - "{{ fail2ban_filter_3proxy }}"
+
+# Distro-specific variables
+fail2ban_centos_ssh_log: /var/log/sshd.log
+fail2ban_centos_auth_log: /var/log/secure
+
+fail2ban_debian_ssh_log: /var/log/sshd.log
+fail2ban_debian_auth_log: /var/log/auth.log
 ...
