@@ -9,7 +9,7 @@
   when: ansible_pkg_mgr == 'apt'
 
 - name: Include jails
-  include_vars: jails.yml
+  include: jails.yml
 
 - name: Include filters
   include: filters.yml
