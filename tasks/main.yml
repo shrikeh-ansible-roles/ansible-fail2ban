@@ -1,4 +1,3 @@
-%YAML 1.2
 ---
 - name: Include CentOS
   include: distros/centos.yml

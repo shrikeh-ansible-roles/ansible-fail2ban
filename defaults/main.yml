@@ -1,5 +1,4 @@
 ---
-
 fail2ban_pkg_install_latest: no
 
 fail2ban_config_dir:          '/etc/fail2ban'

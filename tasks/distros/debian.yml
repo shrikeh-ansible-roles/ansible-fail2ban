@@ -1,4 +1,3 @@
-%YAML 1.2
 ---
 - name: Set SSH log locale for Debian boxes
   set_fact:
