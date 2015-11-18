@@ -9,7 +9,7 @@ addons:
       - python-pycurl
 install:
   - pip install --upgrade pip
-  - pip install ansible
+  - pip install ansible python-netaddr
 env:
   global:
     - TEST_ANSIBLE_HOSTNAME: localhost
