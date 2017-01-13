@@ -6,4 +6,5 @@
     group:  "{{ fail2ban_action_group }}"
     mode:   "{{ fail2ban_action_mode }}"
     state:  directory
+  become: true
 ...
