@@ -25,6 +25,6 @@
     mode:   "{{ fail2ban_localjail_mode }}"
   notify:
     - restart fail2ban
-  become: true
+  become: "{{ fail2ban_become }}"
 
 ...
