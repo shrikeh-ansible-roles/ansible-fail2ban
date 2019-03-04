@@ -1,5 +1,7 @@
 ---
+# fail2ban_start_after_installation: true
 fail2ban_pkg_install_latest: no
+fail2ban_become: false
 
 fail2ban_config_dir:          '/etc/fail2ban'
 

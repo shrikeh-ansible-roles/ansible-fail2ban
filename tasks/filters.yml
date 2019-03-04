@@ -7,6 +7,7 @@
     group:  "{{ fail2ban_filter_group | default('root') }}"
     mode:   "{{ fail2ban_filter_mode | default('0600') }}"
     state:  directory
+  become: "{{ fail2ban_become }}"
 
 - name: Copy the correct filters into place
   template:
@@ -18,4 +19,5 @@
   with_items: "{{fail2ban_jails}}"
   notify:
     - restart fail2ban
+  become: "{{ fail2ban_become }}"
 ...

@@ -25,5 +25,16 @@
     mode:   "{{ fail2ban_localjail_mode }}"
   notify:
     - restart fail2ban
+  become: "{{ fail2ban_become }}"
+
+# - name: Start fail2ban
+#   service:
+#     name:  "{{ jumpcloud_agent_service }}"
+#     state: started
+#   become: "{{ fail2ban_become }}"
+#   ignore_errors: true
+#   when: fail2ban_start_after_installation
+
+
 
 ...

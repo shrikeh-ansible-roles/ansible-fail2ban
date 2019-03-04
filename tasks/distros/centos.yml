@@ -9,10 +9,17 @@
     fail2ban_distro_auth_log: "{{ fail2ban_centos_auth_log }}"
   when: fail2ban_distro_auth_log is not defined
 
+- name: Install EPEL release via yum
+  yum:
+    name: epel-release
+    state: present
+  become: "{{ fail2ban_become }}"
+
 - name: Install fail2ban via yum
   yum:
-    name:  fail2ban
+    name: fail2ban
     state: "{{ 'latest' if fail2ban_pkg_install_latest else 'present' }}"
   notify:
     - restart fail2ban
+  become: "{{ fail2ban_become }}"
 ...

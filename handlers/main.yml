@@ -3,4 +3,5 @@
   service:
     name:  fail2ban
     state: restarted
+  become: "{{ fail2ban_become }}"
 ...
