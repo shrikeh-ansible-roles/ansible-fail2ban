@@ -23,8 +23,8 @@
     owner:  "{{ fail2ban_localjail_owner }}"
     group:  "{{ fail2ban_localjail_group }}"
     mode:   "{{ fail2ban_localjail_mode }}"
-  notify:
-    - restart fail2ban
+  # notify:
+  #   - restart fail2ban
   become: "{{ fail2ban_become }}"
 
 - name: Start fail2ban
