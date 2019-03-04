@@ -17,7 +17,7 @@
     group:  "{{ item.config.filter.conf.group | default(omit) }}"
     mode:   "{{ item.config.filter.conf.mode | default(omit) }}"
   with_items: "{{fail2ban_jails}}"
-  # notify:
-  #   - restart fail2ban
+  notify:
+    - restart fail2ban
   become: "{{ fail2ban_become }}"
 ...
